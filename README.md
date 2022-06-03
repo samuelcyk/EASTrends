@@ -1,7 +1,7 @@
 # Chan et al Unpublished Scripts
-# Please see doi.org/ for description of study
-# Please see https://icriforum.org/documents/status-and-trends-of-east-asian-coral-reefs-1983-2019/ for the regional report contextualising the findings in the regional context.
-# Please see https://gcrmn.net/2020-report/ for the global report from this study and others in a global context.
+# Please see https://doi.org/ for description of study
+# Please see also https://icriforum.org/documents/status-and-trends-of-east-asian-coral-reefs-1983-2019/ for the regional report contextualising the findings in the regional context.
+# Please see also https://gcrmn.net/2020-report/ for the global report from synthesising the regional data with global data in a global context.
 
 # Datasets
 All data within are shared by the coordinators through a data-sharing agreement for the purposes of this study. Please contact the author if you would like to access the data.
