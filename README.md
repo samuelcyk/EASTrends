@@ -6,7 +6,7 @@ Please see also https://icriforum.org/documents/status-and-trends-of-east-asian-
 Please see also https://gcrmn.net/2020-report/ for the global report from synthesising the regional data with global data in a global context.
 
 # Datasets
-All data within are shared by the coordinators through a data-sharing agreement for the purposes of this study. Please contact the author if you would like to access the data.
+All data within are shared by the coordinators through a data-sharing agreement for the purposes of this study. Please contact the author who can direct you to or liaise with the various contributors if you would like to access the data.
 
 # Codes
 01_Country.R - Country data processing and models 
