@@ -56,6 +56,7 @@ wiprior1 <- c(set_prior("normal(0.5,0.5)", class="b"),
 )
 
 #### Main models ####
+brm.method <- brm(CoralMin ~ s(Year) + s(Depth) + Country + (1|Method) + (1|Location) + (1|Site), data=dataset, family=Beta, cores=2)
 
 brm.wip.country <- brm(CoralMin ~ s(Year) + s(Depth) + Country + (1|Location) + (1| Site), prior=wiprior, data=dataset, family=Beta, cores=2, file="brm.wip.country")
 brm.wip.bycountry <- brm(CoralMin ~ s(Year, by=Country) + s(Depth) + Country + (1|Location) + (1| Site), prior=wiprior1, data=dataset, family=Beta, cores=2, file="brm.wip.bycountry")
