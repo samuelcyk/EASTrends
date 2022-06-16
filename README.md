@@ -15,6 +15,4 @@ All data within are shared by the coordinators through a data-sharing agreement 
 
 03_Models.R - brms models
 
-04_Bleaching.R - Bleaching data processing and models
-
-05_Figures.R - Codes for processing and generating figures
+04_Figures.R - Codes for processing and generating figures
