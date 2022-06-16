@@ -1,4 +1,4 @@
-# Chan et al Unpublished Scripts
+# Chan et al 2022 Decadal stability in coral cover could mask hidden changes on reefs in the East Asian Seas (Unpublished)
 Please see https://doi.org/ for description of study
 
 Please see also https://icriforum.org/documents/status-and-trends-of-east-asian-coral-reefs-1983-2019/ for the regional report contextualising the findings in the regional context.
