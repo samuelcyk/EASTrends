@@ -1,0 +1,156 @@
+library(ggplot2) 
+library(brms)
+library(performance)
+library(tidyverse)
+library(ggpubr)
+library(nlme)
+library(MuMIn)
+library(texreg)
+library(visreg)
+
+
+temp.baamax <- read.csv("newdata/temp.csv", header=T) %>% select(., 1:3,4:15) %>%
+  pivot_longer(., cols=4:15, names_to = "mon", names_prefix="baa_max_", values_to = "baa_max") %>% 
+  mutate(., Month=recode(mon, "jan" = 1, "feb" = 2, "mar" = 3, "apr" = 4, "may" = 5, "jun" = 6, 
+                          "jul" = 7, "aug" = 8, "sep" = 9, "oct" = 10, "nov" = 11, "dec" = 12)) %>%
+  select(., Longitude = X, Latitude = Y, Year, Month, baa_max)
+temp.dhwmax <- read.csv("newdata/temp.csv", header=T) %>% select(., 1:3,16:27) %>%
+  pivot_longer(., cols=4:15, names_to = "mon", names_prefix="dhw_max_", values_to = "dhw_max") %>% 
+  mutate(., Month=recode(mon, "jan" = 1, "feb" = 2, "mar" = 3, "apr" = 4, "may" = 5, "jun" = 6, 
+                       "jul" = 7, "aug" = 8, "sep" = 9, "oct" = 10, "nov" = 11, "dec" = 12)) %>%
+  select(., Longitude = X, Latitude = Y, Year, Month, dhw_max)
+temp.sstmax <- read.csv("newdata/temp.csv", header=T) %>% select(., 1:3,28:39) %>%
+  pivot_longer(., cols=4:15, names_to = "mon", names_prefix="sst_max_", values_to = "sst_max") %>% 
+  mutate(., Month=recode(mon, "jan" = 1, "feb" = 2, "mar" = 3, "apr" = 4, "may" = 5, "jun" = 6, 
+                       "jul" = 7, "aug" = 8, "sep" = 9, "oct" = 10, "nov" = 11, "dec" = 12)) %>%
+  select(., Longitude = X, Latitude = Y, Year, Month, sst_max)
+temp.sstmean <- read.csv("newdata/temp.csv", header=T) %>% select(., 1:3,40:51) %>% 
+  pivot_longer(., cols=4:15, names_to = "mon", names_prefix="sst_mean_", values_to = "sst_mean") %>% 
+  mutate(., Month=recode(mon, "jan" = 1, "feb" = 2, "mar" = 3, "apr" = 4, "may" = 5, "jun" = 6, 
+                       "jul" = 7, "aug" = 8, "sep" = 9, "oct" = 10, "nov" = 11, "dec" = 12)) %>%
+  select(., Longitude = X, Latitude = Y, Year, Month, sst_mean)
+temp.sstmin <- read.csv("newdata/temp.csv", header=T) %>% select(., 1:3,52:63) %>%
+  pivot_longer(., cols=4:15, names_to = "mon", names_prefix="sst_min_", values_to = "sst_min") %>% 
+  mutate(., Month=recode(mon, "jan" = 1, "feb" = 2, "mar" = 3, "apr" = 4, "may" = 5, "jun" = 6, 
+                       "jul" = 7, "aug" = 8, "sep" = 9, "oct" = 10, "nov" = 11, "dec" = 12)) %>%
+  select(., Longitude = X, Latitude = Y, Year, Month, sst_min)
+temp.sstamax <- read.csv("newdata/temp.csv", header=T) %>% select(., 1:3,64:75) %>%
+  pivot_longer(., cols=4:15, names_to = "mon", names_prefix="ssta_max_", values_to = "ssta_max") %>% 
+  mutate(., Month=recode(mon, "jan" = 1, "feb" = 2, "mar" = 3, "apr" = 4, "may" = 5, "jun" = 6, 
+                       "jul" = 7, "aug" = 8, "sep" = 9, "oct" = 10, "nov" = 11, "dec" = 12)) %>%
+  select(., Longitude = X, Latitude = Y, Year, Month, ssta_max)
+temp.sstamean <- read.csv("newdata/temp.csv", header=T) %>% select(., 1:3,76:87) %>%
+  pivot_longer(., cols=4:15, names_to = "mon", names_prefix="ssta_mean_", values_to = "ssta_mean") %>% 
+  mutate(., Month=recode(mon, "jan" = 1, "feb" = 2, "mar" = 3, "apr" = 4, "may" = 5, "jun" = 6, 
+                       "jul" = 7, "aug" = 8, "sep" = 9, "oct" = 10, "nov" = 11, "dec" = 12)) %>%
+  select(., Longitude = X, Latitude = Y, Year, Month, ssta_mean)
+temp.sstamin <- read.csv("newdata/temp.csv", header=T) %>% select(., 1:3,88:99) %>%
+  pivot_longer(., cols=4:15, names_to = "mon", names_prefix="ssta_min_", values_to = "ssta_min") %>% 
+  mutate(., Month=recode(mon, "jan" = 1, "feb" = 2, "mar" = 3, "apr" = 4, "may" = 5, "jun" = 6, 
+                       "jul" = 7, "aug" = 8, "sep" = 9, "oct" = 10, "nov" = 11, "dec" = 12)) %>%
+  select(., Longitude = X, Latitude = Y, Year, Month, ssta_min)
+
+tempenv <- inner_join(temp.baamax, temp.dhwmax) %>% 
+  inner_join(., temp.sstmax) %>%
+  inner_join(., temp.sstmean) %>%
+  inner_join(., temp.sstmin) %>%
+  inner_join(., temp.sstamax) %>%
+  inner_join(., temp.sstamean) %>%
+  inner_join(., temp.sstamin)
+
+fullenvdata <- read.csv("newdata/finalenvdata.csv", header=T) %>% 
+  select(., -Site) %>% 
+  rename(., Site = Merged.Site, Code=ï..Code)
+
+as.numeric(levels(fullenvdata$Latitude))[fullenvdata$Latitude]
+fullenvrep <- fullenvdata %>% filter(., REMOVED!= "Y")
+
+#### MUMIN ####
+
+envdata <- read.csv("newdata/compiledfullnew_edit_FINAL.csv", header=T) %>%
+  select(., - Site, -REMOVED) %>%
+  rename(., Site = Merged.Site) %>%
+  left_join(., tempenv) %>%
+  left_join(., annualtempenv)
+
+envdata$CoralMin <- ((envdata$Hardcoral * (nrow(envdata)-1)) + (1/2)) / (nrow(envdata))
+envdata$AlgaeMin <- ((envdata$Macroalgae * (nrow(envdata)-1)) + (1/2)) / (nrow(envdata))
+
+envdata.narm1 <- envdata[complete.cases(envdata[ , 62:92]),]
+envdata.narm <- envdata.narm1[complete.cases(envdata.narm1[ , 11]),]
+
+envdata.naal <- envdata.narm[complete.cases(envdata.narm[ , 16]),]
+
+envdata.narmc <- scale(envdata.narm[,c(39:51,53:55,58,62:92)], center=T)
+envdata.narmm <- envdata.narm[,c(1:24)]
+envdata.center <- cbind(envdata.narmm, envdata.narmc)
+
+envdata.naalc <- scale(envdata.naal[,c(39:51,53:55,58,62:92)], center=T)
+envdata.naalm <- envdata.naal[,c(1:24)]
+envdataal.center <- cbind(envdata.naalm, envdata.naalc)
+
+#write.csv(envdata, file="newdata/envcompiled.csv")
+
+
+## Model for averaging ##
+#maxmodel.narmhc.c <- lme(Hardcoral ~ Year + Country + Depth + pop_est_5km + pop_est_100km + 
+#                           reef_area_5km + reef_area_100km + npp_mean + npp_min + npp_max + npp_sd + npp_interann_sd + 
+#                           wave_mean + wave_sd + wave_interann_sd + dist_market + baa_max + dhw_max + 
+#                           sst_max + sst_mean + sst_min + ssta_max + ssta_mean + ssta_min,
+#                         random = ~ 1| Location/Site, data=envdata.center, method="ML")
+
+#dredgemodel.c <- dredge(maxmodel.narmhc.c, m.lim=c(NA, 6), trace=T)
+
+model.averagec.d10 <- model.avg(dredgemodel.c, subset = delta <10)
+model.averagec.d2 <- model.avg(dredgemodel.c, subset = delta <2)
+model.averagec.d6 <- model.avg(dredgemodel.c, subset = delta <6)
+model.averagec.95 <- model.avg(dredgemodel.c, cumsum(weight) <=0.95)
+confint(model.averagec.d)
+summary(model.averagec.d6)
+
+
+#maxmodel.narmma.c <- lme(Macroalgae ~ Year + Country + Depth + pop_est_5km + pop_est_100km + 
+#                           reef_area_5km + reef_area_100km + npp_mean + npp_min + npp_max + npp_sd + npp_interann_sd + 
+#                           wave_mean + wave_sd + wave_interann_sd + dist_market + baa_max + dhw_max + 
+#                           sst_max + sst_mean + sst_min + ssta_max + ssta_mean + ssta_min,
+#                           random = ~ 1| Location/Site, data=envdataal.center, method="ML")
+
+#dredgemodel.m <- dredge(maxmodel.narmma.c, m.lim=c(NA, 6), trace=T)
+
+model.averagemac.d10 <- model.avg(dredgemodel.m, subset = delta <10)
+model.averagemac.d2 <- model.avg(dredgemodel.m, subset = delta <2)
+model.averagemac.d6 <- model.avg(dredgemodel.m, subset = delta <6)
+model.averagemac.95 <- model.avg(dredgemodel.m, cumsum(weight) <=0.95)
+confint(model.averagec.d)
+summary(model.averagec.d6)
+
+#### Function to calculate maximum correlation coefficient between predictor variables, retrieved from each model ####
+## from https://github.com/rojaff/dredge_mc/blob/master/dredge.R ##
+max.r <- function(x){
+  if(class(x)[length(class(x))] == "lm"){
+    corm <- summary(x, correlation=TRUE)$correlation}
+  else if(class(x) =="lmerMod"){
+    corm <- cov2cor(vcov(x))}
+  else if(class(x) =="lmerModLmerTest"){
+    corm <- cov2cor(vcov(x))}
+  else if(class(x) =="glmerMod"){
+    corm <- cov2cor(vcov(x))}
+  else if(class(x)=="gls"){
+    corm <- summary(x)$corBeta} 
+  else if(class(x)=="lme"){
+    corm <- summary(x)$corFixed}
+  else { print("Error: Invalid model class")}
+  corm <- as.matrix(corm)
+  if (length(corm)==1){
+    corm <- 0
+    max(abs(corm))
+  } else if (length(corm)==4){
+    cormf <- corm[2:nrow(corm),2:ncol(corm)]
+    cormf <- 0
+    max(abs(cormf))
+  } else {
+    cormf <- corm[2:nrow(corm),2:ncol(corm)]
+    diag(cormf) <- 0
+    max(abs(cormf))
+  }
+}
