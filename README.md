@@ -6,10 +6,14 @@ Please see also https://icriforum.org/documents/status-and-trends-of-east-asian-
 Please see also https://gcrmn.net/2020-report/ for the global report from synthesising the regional data with global data in a global context.
 
 # Datasets
-All data within are shared by the coordinators through a data-sharing agreement for the purposes of this study. Please contact the author who can direct you to or liaise with the various contributors if you would like to access the data. An anonymized dataset is included for the purposes of recreating some of the analyses and plots.
+As the data were shared by the various authors under a data sharing agreement, an anonymized dataset with the locations scrubbed is available here. The full dataset can be requested from the corresponding author who will direct the request to the corresponding contributors for approval.
 
 # Codes
 01_Country.R - Country data processing
 02_Env.R - Environmental data processing
 03_Models.R - brms models and all data analyses
 04_Figures.R - Figures creations and processing 
+
+# Data
+01_Data.csv - Benthic cover dataset
+02_Correlates.csv - Environmental and socio-economic correlates 
