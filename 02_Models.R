@@ -1,8 +1,6 @@
-library(ggplot2) 
-library(plyr)
+library(tidyverse)
 library(brms)
 library(performance)
-library(dplyr)
 library(RColorBrewer)
 
 #### read data & subset ####
