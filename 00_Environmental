@@ -282,3 +282,8 @@ annualtempenv <- inner_join(env.annualbaa, env.annualdhw) %>%
   inner_join(., env.annualsstamean) %>%
   inner_join(., env.annualsstamin) %>%
   select(., 2,4,6:30)
+
+envdata <- read.csv("data/envdata.csv", header=T) %>%
+  left_join(., tempenv) %>%
+  left_join(., annualtempenv)
+dataset <- merge(coraldata, envdata)
