@@ -2,11 +2,11 @@ library(tidyverse)
 
 ## dataset processing ##
 ## read datasets, select -columns with environmental data ##
-dataset <- read.csv("newdata/data.csv", header=T) %>%
+dataset <- read.csv("data/dataset.csv", header=T) %>%
   select(., -c(6,24:40))
 
 ## dataset with at least 3 time points ##
-datasetrep <- read.csv("newdata/data.csv", header=T) %>%
+datasetrep <- read.csv("data/dataset.csv", header=T) %>%
   filter(., REMOVED !="Y") %>%
   select(., -c(6,24:40))
   
