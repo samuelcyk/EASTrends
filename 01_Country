@@ -5,23 +5,23 @@ library(ggpubr)
 library(performance)
 library(patchwork)
 
+## read datasets, select -columns with environmental data ##
+dataset <- read.csv("newdata/data.csv", header=T) %>%
+  select(., -c(6,24:40))
 
-dataset <- read.csv("newdata/compiledfullnew_edit_FINAL.csv", header=T) %>%
-  select(., -c(7,8,27:40,54,58,59,61:63)) %>%
-  rename(., Site="Merged.Site")
-
-datasetrep <- read.csv("newdata/compiledfullnew_edit_FINAL.csv", header=T) %>%
+## dataset with at least 3 time points ##
+datasetrep <- read.csv("newdata/data.csv", header=T) %>%
   filter(., REMOVED !="Y") %>%
-  select(., -c(7,26:39,53,57,58,60:62)) %>%
-  rename(., Site="Merged.Site")
-
-datasetrep$fYear <- factor(datasetrep$Year)
-
+  select(., -c(6,24:40))
+  
+## beta scaling for proportion data based off Smithson and Verkuilen (2006) ##
 dataset$CoralMin <- ((dataset$Hardcoral * (nrow(dataset)-1)) + (1/2)) / (nrow(dataset))
-datasetrep$CoralMin <- ((datasetrep$Hardcoral * (nrow(datasetrep)-1)) + (1/2)) / (nrow(datasetrep))
 dataset$AlgaeMin <- ((dataset$Macroalgae * (nrow(dataset)-1)) + (1/2)) / (nrow(dataset))
+
+datasetrep$CoralMin <- ((datasetrep$Hardcoral * (nrow(datasetrep)-1)) + (1/2)) / (nrow(datasetrep))
 datasetrep$AlgaeMin <- ((datasetrep$Macroalgae * (nrow(datasetrep)-1)) + (1/2)) / (nrow(datasetrep))
 
+## creating country data, methods data for reports, analyses ##
 dataset.brunei <- dataset %>% filter(., Country=="Brunei")
 dataset.cambodia <- dataset %>% filter(., Country=="Cambodia")
 dataset.hongkong <- dataset %>% filter(., Country=="Hong Kong")
@@ -37,9 +37,6 @@ dataset.southkorea <- dataset %>% filter(., Country=="South Korea")
 dataset.taiwan <- dataset %>% filter(., Country=="Taiwan")
 dataset.thailand <- dataset %>% filter(., Country=="Thailand")
 dataset.vietnam <- dataset %>% filter(., Country=="Vietnam")
-
-dataset.ea <- dataset %>% filter(., Region=="EA")
-dataset.sea <- dataset %>% filter(., Region=="SEA")
 
 dataset.lit <- dataset %>% filter(., Method=="LIT")
 dataset.pit <- dataset %>% filter(., Method=="PIT" | Method=="Reefcheck")
@@ -58,26 +55,3 @@ datasetLT.southkorea <- datasetrep %>% filter(., Country=="South Korea")
 datasetLT.taiwan <- datasetrep %>% filter(., Country=="Taiwan")
 datasetLT.thailand <- datasetrep %>% filter(., Country=="Thailand")
 datasetLT.vietnam <- datasetrep %>% filter(., Country=="Vietnam")
-
-brm.br <- brm(CoralMin ~ s(Year) + s(Depth) + (1| Location) + (1| Site), data=dataset.brunei, family=Beta, cores=2)
-brm.ca <- brm(CoralMin ~ Year + Depth + (1| Location) + (1| Site), data=dataset.cambodia, family=Beta, cores=2)
-brm.hk <- brm(CoralMin ~ Year + Depth + (1| Location) + (1| Site), data=dataset.hongkong, family=Beta, cores=2)
-brm.in <- brm(CoralMin ~ s(Year) + s(Depth) + (1| Location) + (1| Site), data=dataset.indonesia, family=Beta, cores=2)
-brm.in2 <- brm(CoralMin ~ s(Year) + Depth + (1| Location) + (1| Site), data=dataset.indonesia, family=Beta, cores=2)
-brm.jp <- brm(CoralMin ~ t2(Year,Depth, by=Site) + (1| Location), data=dataset.japan, family=Beta, cores=2)
-brm.jp2 <- brm(CoralMin ~ s(Year) + s(Depth) + (1| Location) + (1| Site), data=dataset.japan, family=Beta, cores=2)
-brm.ma <- brm(CoralMin ~ s(Year) + s(Depth) + (1| Location) + (1| Site), data=dataset.malaysia, family=Beta, cores=2)
-brm.ma2 <- brm(CoralMin ~ s(Year) + Depth + (1| Location) + (1| Site), data=dataset.malaysia, family=Beta, cores=2)
-brm.my <- brm(CoralMin ~ Year + Depth + (1| Location) + (1| Site), data=dataset.myanmar, family=Beta, cores=2)
-brm.ph <- brm(CoralMin ~ s(Year) + s(Depth) + (1| Location) + (1| Site), data=dataset.philippines, family=Beta, cores=2)
-brm.sg <- brm(CoralMin ~ s(Year) + Depth + (1| Location) + (1| Site), data=dataset.singapore, family=Beta, cores=2)
-brm.sk <- brm(CoralMin ~ Year + Depth + (1| Location) + (1| Site), data=dataset.southkorea, family=Beta, cores=2)
-brm.sk2 <- brm(CoralMin ~ Year + (1| Location) + (1| Site), data=dataset.southkorea, family=Beta, cores=2)
-brm.tw <- brm(CoralMin ~ s(Year) + Depth + (1| Location) + (1| Site), data=dataset.taiwan, family=Beta, cores=2)
-brm.tw2 <- brm(CoralMin ~ Year + Depth + (1| Location) + (1| Site), data=dataset.taiwan, family=Beta, cores=2)
-brm.th <- brm(CoralMin ~ s(Year) + s(Depth) + (1| Location) + (1| Site), data=dataset.thailand, family=Beta, cores=2)
-brm.vn <- brm(CoralMin ~ s(Year) + Depth + (1| Location) + (1| Site), data=dataset.vietnam, family=Beta, cores=2)
-brm.vn2 <- brm(CoralMin ~ Year + Depth + (1| Location) + (1| Site), data=dataset.vietnam, family=Beta, cores=2)
-
-brm.wma <- brm(CoralMin ~ s(Year) + s(Depth) + (1| Location) + (1| Site), data=dataset.wmalaysia, family=Beta, cores=2)
-brm.ema <- brm(CoralMin ~ s(Year) + s(Depth) + (1| Location) + (1| Site), data=dataset.emalaysia, family=Beta, cores=2)
