@@ -242,8 +242,8 @@ coverplot2 <- loessplot + brmsplot1 + brmsplot2 +
   meanplot + brmaplot1 + brmaplot2 + plot_annotation(tag_levels = 'a') + 
   plot_layout(design = layout.cover)
 
-ggsave(coverplot2, width=22.5, height=15, units="cm", dpi=300, filename="newfigspub/coverplot2.nogrid.tiff")
-ggsave(coverplot2, width=22.5, height=15, units="cm", dpi=300, filename="newfigspub/coverplot2.nogrid.svg")
+ggsave(coverplot2, width=22.5, height=15, units="cm", dpi=300, filename="figs/coverplot2.tiff")
+ggsave(coverplot2, width=22.5, height=15, units="cm", dpi=300, filename="figs/coverplot2.svg")
 
 #### Figure 3 a ####
 boxplot <- ggplot(dataset, aes(Country, Hardcoral)) + 
@@ -334,10 +334,10 @@ coverplot3 <- boxplot + loesscountryplot.n + brmsplot3 +
   boxplotma + loesscountryplot.nma + brmaplot3 + plot_annotation(tag_levels = 'a') + 
   plot_layout(design = layout.cover, guides="collect") 
 
-ggsave(coverplot3, width=22.5, height=17.5, units="cm", dpi=300, filename="newfigspub/coverplot3.nogrid.tiff")
-ggsave(coverplot3, width=22.5, height=17.5, units="cm", dpi=300, filename="newfigspub/coverplot3.nogrid.svg")
+ggsave(coverplot3, width=22.5, height=17.5, units="cm", dpi=300, filename="figs/coverplot3.tiff")
+ggsave(coverplot3, width=22.5, height=17.5, units="cm", dpi=300, filename="figs/coverplot3.svg")
 
-#### Model plots for Fig 4####
+#### Model plots for Fig 4 ####
 
 brmplots.t1 <- plot(marginal_effects(brm.time1), point_args = c(alpha = 0.5, size = 1.5), points=F, ask=F)
 brmplots.t11 <- brmplots.t1$Year + 
@@ -411,8 +411,8 @@ nullplot <- brmplots.t11 + brmplots.t21 + brmplots.t31 +
   brm.bp.3aplots2 + brm.bp.3aplots3 + maxmincover + plot_annotation(tag_levels = 'a') + 
   plot_layout(design = layout.cover, guides="collect") 
 
-ggsave(nullplot, width=22.5, height=17.5, units="cm", dpi=300, filename="newfigspub/nullplot.nogrid.tiff")
-ggsave(nullplot, width=22.5, height=17.5, units="cm", dpi=300, filename="newfigspub/nullplot.nogrid.eps")
+ggsave(nullplot, width=22.5, height=17.5, units="cm", dpi=300, filename="figs/nullplot.tiff")
+ggsave(nullplot, width=22.5, height=17.5, units="cm", dpi=300, filename="figs/nullplot.eps")
 
 
 #### Supplementary plots ####
@@ -428,11 +428,11 @@ brmsplot4 <- brmsplot4 + scale_y_continuous(limits = c(0,1.0), expand=c(0,0)) +
 brmaplot4 <- brmaplot4 + scale_y_continuous(limits = c(0,0.5), expand=c(0,0)) +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) 
 
-ggsave(brmsplot4, width=22.5, height=17.5, units="cm", dpi=300, filename="newfigspub/supplot0a.tiff")
-ggsave(brmsplot4, width=22.5, height=17.5, units="cm", dpi=300, filename="newfigspub/supplot0a.svg")
+ggsave(brmsplot4, width=22.5, height=17.5, units="cm", dpi=300, filename="figs/supplot0a.tiff")
+ggsave(brmsplot4, width=22.5, height=17.5, units="cm", dpi=300, filename="figs/supplot0a.svg")
 
-ggsave(brmaplot4, width=22.5, height=17.5, units="cm", dpi=300, filename="newfigspub/supplot0b.tiff")
-ggsave(brmaplot4, width=22.5, height=17.5, units="cm", dpi=300, filename="newfigspub/supplot0b.svg")
+ggsave(brmaplot4, width=22.5, height=17.5, units="cm", dpi=300, filename="figs/supplot0b.tiff")
+ggsave(brmaplot4, width=22.5, height=17.5, units="cm", dpi=300, filename="figs/supplot0b.svg")
 
 brmplots.nojp <- plot(marginal_effects(brm.nojpbc), point_args = c(alpha = 0.5, size = 1.5), points=F, ask=F)
 brmplots.nojp1 <- brmplots.nojp$Year + theme(axis.text.x = element_text(hjust=1)) + labs(y="Coral Cover") + 
@@ -482,8 +482,8 @@ supplot1 <- brmplots.nojp1 + brmplots.nojp2 + brmplots.nojp3 + brmplots.nojp4 + 
 supplot2 <- brmplots.nomy1 + brmplots.nomy2 + brmplots.nomy3 + brmplots.nomy4 + plot_annotation(tag_levels = 'a') + 
   plot_layout(design = layout.supp, guides="collect") 
 
-ggsave(supplot1, width=22.5, height=17.5, units="cm", dpi=300, filename="newfigspub/supplot1.tiff")
-ggsave(supplot1, width=22.5, height=17.5, units="cm", dpi=300, filename="newfigspub/supplot1.svg")
+ggsave(supplot1, width=22.5, height=17.5, units="cm", dpi=300, filename="figs/supplot1.tiff")
+ggsave(supplot1, width=22.5, height=17.5, units="cm", dpi=300, filename="figs/supplot1.svg")
 
-ggsave(supplot2, width=22.5, height=17.5, units="cm", dpi=300, filename="newfigspub/supplot2.tiff")
-ggsave(supplot2, width=22.5, height=17.5, units="cm", dpi=300, filename="newfigspub/supplot2.svg")
+ggsave(supplot2, width=22.5, height=17.5, units="cm", dpi=300, filename="figs/supplot2.tiff")
+ggsave(supplot2, width=22.5, height=17.5, units="cm", dpi=300, filename="figs/supplot2.svg")
