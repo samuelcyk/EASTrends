@@ -17,6 +17,50 @@ dataset$AlgaeMin <- ((dataset$Macroalgae * (nrow(dataset)-1)) + (1/2)) / (nrow(d
 datasetrep$CoralMin <- ((datasetrep$Hardcoral * (nrow(datasetrep)-1)) + (1/2)) / (nrow(datasetrep))
 datasetrep$AlgaeMin <- ((datasetrep$Macroalgae * (nrow(datasetrep)-1)) + (1/2)) / (nrow(datasetrep))
 
+## priors ##
+wiprior <- c(set_prior("normal(0,0.25)", class="b"),
+            set_prior("cauchy(0,5)", class="sd", group="Location"),
+            set_prior("cauchy(0,5)", class="sd", group="Location:Site"),
+            set_prior("normal(0,0.25)", class="sds", coef="s(Year, by = Country)"),
+            set_prior("normal(0,0.25)", class="sds", coef="s(Depth)"))
+           
+## main models ##
+brm.wip.bycountry <- brm(CoralMin ~ s(Year, by=Country) + s(Depth) + Country + (1|Location/Site), prior=wiprior, data=dataset, family=Beta, cores=2, iter=10000, file="brm.wip.bycountry")
+brma.wip.bycountry <- brm(AlgaeMin ~ s(Year, by=Country) + s(Depth) + Country + (1|Location/Site), prior=wiprior, data=dataset, family=Beta, cores=2, iter=10000, file="brma.wip.bycountry")
+
+## models compared ##
+brm.method <- brm(CoralMin ~ s(Year, by=Country) + s(Depth) + Country + (1|Method) + (1|Location/Site), data=dataset, family=Beta, cores=2)
+brm.location <- brm(CoralMin ~ s(Year, by=Country) + s(Depth) + Country + (1|Location), data=dataset, family=Beta, cores=2)
+brm.site <- brm(CoralMin ~ s(Year, by=Country) + s(Depth) + Country + (1|Site), data=dataset, family=Beta, cores=2)
+brm.bycountry.rs1 <- brm(CoralMin ~ s(Year) + s(Depth) + Country + (Year|Site), data=dataset, family=Beta, cores=2)
+brm.bycountry.rs2 <- brm(CoralMin ~ s(Year) + s(Depth) + Country + (Depth|Site), data=dataset, family=Beta, cores=2)
+
+brm.linear <- brm(CoralMin ~ Year + Depth + Country + (1|Location/Site), data=dataset, family=Beta, cores=2, file="brm.linear")
+brm.t2 <- brm(CoralMin ~ t2(Year, Depth, by=Country) + (1| Location/Site), data=dataset, family=Beta, cores=2, file="brm.t2")
+brm.country <- brm(CoralMin ~ s(Year) + s(Depth) + Country + (1|Location/Site), data=dataset, family=Beta, cores=2, file="brm.country")
+brm.bycountry <- brm(CoralMin ~ s(Year, by=Country) + s(Depth) + Country + (1|Location/Site), data=dataset, family=Beta, cores=2, file="brm.bycountry")
+compare_performance(brm.linear, brm.t2, brm.country, brm.bycountry)
+
+## models with countries removed ##
+dataset.nojp <- dataset %>% filter(., Country !="Japan")
+dataset.nomy <- dataset %>% filter(., Country !="Myanmar")
+
+brm.nojp <-brm(CoralMin ~ s(Year, by=Country) + s(Depth) + Country + (1|Location/Site), data=dataset.nojp, family=Beta, cores=2, file="brm.nojpbc")
+brm.nomy <-brm(CoralMin ~ s(Year, by=Country) + s(Depth) + Country + (1|Location/Site), data=dataset.nomy, family=Beta, cores=2, file="brm.nomybc")
+
+rm(dataset.npjp);rm(dataset.nomy)
+
+## models for individual time periods ##
+dataset.time1 <- dataset %>% filter(., Year<1998)
+dataset.time2 <- dataset %>% filter(., Year>1997 & Year<2010)
+dataset.time3 <- dataset %>% filter(., Year>2009)
+
+brm.time1 <-brm(CoralMin ~ s(Year, by=Country) + s(Depth) + Country + (1|Location/Site), data=dataset.time1, family=Beta, cores=2, file="brm.time1")
+brm.time2 <-brm(CoralMin ~ s(Year, by=Country) + s(Depth) + Country + (1|Location/Site), data=dataset.time2, family=Beta, cores=2, file="brm.time2")
+brm.time3 <-brm(CoralMin ~ s(Year, by=Country) + s(Depth) + Country + (1|Location/Site), data=dataset.time3, family=Beta, cores=2, file="brm.time3")
+
+rm(dataset.time1);rm(dataset.time2);rm(dataset.time3)
+
 ## creating country data, methods data for reports, analyses ##
 dataset.brunei <- dataset %>% filter(., Country=="Brunei")
 dataset.cambodia <- dataset %>% filter(., Country=="Cambodia")
@@ -34,10 +78,6 @@ dataset.taiwan <- dataset %>% filter(., Country=="Taiwan")
 dataset.thailand <- dataset %>% filter(., Country=="Thailand")
 dataset.vietnam <- dataset %>% filter(., Country=="Vietnam")
 
-dataset.lit <- dataset %>% filter(., Method=="LIT")
-dataset.pit <- dataset %>% filter(., Method=="PIT" | Method=="Reefcheck")
-dataset.transect <- dataset %>% filter(., Method !="Timedswim")
-
 datasetLT.brunei <- datasetrep %>% filter(., Country=="Brunei")
 datasetLT.cambodia <- datasetrep %>% filter(., Country=="Cambodia")
 datasetLT.hongkong <- datasetrep %>% filter(., Country=="Hong Kong")
@@ -52,19 +92,36 @@ datasetLT.taiwan <- datasetrep %>% filter(., Country=="Taiwan")
 datasetLT.thailand <- datasetrep %>% filter(., Country=="Thailand")
 datasetLT.vietnam <- datasetrep %>% filter(., Country=="Vietnam")
 
-## priors ##
-wiprior <- c(set_prior("normal(0,0.25)", class="b"),
-            set_prior("cauchy(0,5)", class="sd", group="Location"),
-            set_prior("cauchy(0,5)", class="sd", group="Location:Site"),
-            set_prior("normal(0,0.25)", class="sds", coef="s(Year, by = Country)"),
-            set_prior("normal(0,0.25)", class="sds", coef="s(Depth)"))
-           
-## main models ##
-brm.wip.bycountry <- brm(CoralMin ~ s(Year, by=Country) + s(Depth) + Country + (1|Location/Site), prior=wiprior, data=dataset, family=Beta, cores=2, iter=10000, file="brm.wip.bycountry")
-brma.wip.bycountry <- brm(AlgaeMin ~ s(Year, by=Country) + s(Depth) + Country + (1|Location/Site), prior=wiprior, data=dataset, family=Beta, cores=2, iter=10000, file="brma.wip.bycountry")
+## individual country models for report ##
+brm.br <- brm(CoralMin ~ s(Year) + s(Depth) + (1| Location) + (1| Site), data=dataset.brunei, family=Beta, cores=2)
+brm.ca <- brm(CoralMin ~ Year + Depth + (1| Location) + (1| Site), data=dataset.cambodia, family=Beta, cores=2)
+brm.hk <- brm(CoralMin ~ Year + Depth + (1| Location) + (1| Site), data=dataset.hongkong, family=Beta, cores=2)
+brm.in <- brm(CoralMin ~ s(Year) + s(Depth) + (1| Location) + (1| Site), data=dataset.indonesia, family=Beta, cores=2)
+brm.in2 <- brm(CoralMin ~ s(Year) + Depth + (1| Location) + (1| Site), data=dataset.indonesia, family=Beta, cores=2)
+brm.jp <- brm(CoralMin ~ t2(Year,Depth, by=Site) + (1| Location), data=dataset.japan, family=Beta, cores=2)
+brm.jp2 <- brm(CoralMin ~ s(Year) + s(Depth) + (1| Location) + (1| Site), data=dataset.japan, family=Beta, cores=2)
+brm.ma <- brm(CoralMin ~ s(Year) + s(Depth) + (1| Location) + (1| Site), data=dataset.malaysia, family=Beta, cores=2)
+brm.ma2 <- brm(CoralMin ~ s(Year) + Depth + (1| Location) + (1| Site), data=dataset.malaysia, family=Beta, cores=2)
+brm.my <- brm(CoralMin ~ Year + Depth + (1| Location) + (1| Site), data=dataset.myanmar, family=Beta, cores=2)
+brm.ph <- brm(CoralMin ~ s(Year) + s(Depth) + (1| Location) + (1| Site), data=dataset.philippines, family=Beta, cores=2)
+brm.sg <- brm(CoralMin ~ s(Year) + Depth + (1| Location) + (1| Site), data=dataset.singapore, family=Beta, cores=2)
+brm.sk <- brm(CoralMin ~ Year + Depth + (1| Location) + (1| Site), data=dataset.southkorea, family=Beta, cores=2)
+brm.sk2 <- brm(CoralMin ~ Year + (1| Location) + (1| Site), data=dataset.southkorea, family=Beta, cores=2)
+brm.tw <- brm(CoralMin ~ s(Year) + Depth + (1| Location) + (1| Site), data=dataset.taiwan, family=Beta, cores=2)
+brm.tw2 <- brm(CoralMin ~ Year + Depth + (1| Location) + (1| Site), data=dataset.taiwan, family=Beta, cores=2)
+brm.th <- brm(CoralMin ~ s(Year) + s(Depth) + (1| Location) + (1| Site), data=dataset.thailand, family=Beta, cores=2)
+brm.vn <- brm(CoralMin ~ s(Year) + Depth + (1| Location) + (1| Site), data=dataset.vietnam, family=Beta, cores=2)
+brm.vn2 <- brm(CoralMin ~ Year + Depth + (1| Location) + (1| Site), data=dataset.vietnam, family=Beta, cores=2)
 
-## models compared ##
-brm.method <- brm(CoralMin ~ s(Year, by=Country) + s(Depth) + Country + (1|Method) + (1|Location/Site), data=dataset, family=Beta, cores=2)
-brm.location <- brm(CoralMin ~ s(Year, by=Country) + s(Depth) + Country + (1|Location), data=dataset, family=Beta, cores=2)
-brm.site <- brm(CoralMin ~ s(Year, by=Country) + s(Depth) + Country + (1|Method) + (1|Site), data=dataset, family=Beta, cores=2)
+## creating datasets for null analyses ##
+dataset.null <- dataset %>% group_by(Year, Site, Month) %>% summarise(n = n(), mean.hc = mean(Hardcoral), sd.hc = sd(Hardcoral))
+dataset.null.yeardiff <- dataset.null %>% group_by(Site) %>% summarise(n.years = n(), yearstart = min(Year), yearend = max(Year), yeardiff = max(Year) - min(Year))
+dataset.null.yeardiff5<- dataset.null.yeardiff %>% filter(., yeardiff>4)
+dataset.null.yeardiff10<- dataset.null.yeardiff %>% filter(., yeardiff>9)
+dataset.null.yeardiff15<- dataset.null.yeardiff %>% filter(., yeardiff>14)
+dataset.null.yeardiff20<- dataset.null.yeardiff %>% filter(., yeardiff>19)
 
+dataset.yeardiff5 <- dataset %>% filter(., Site %in% dataset.null.yeardiff5$Site) 
+dataset.yeardiff10 <- dataset %>% filter(., Site %in% dataset.null.yeardiff10$Site) 
+dataset.yeardiff15 <- dataset %>% filter(., Site %in% dataset.null.yeardiff15$Site) 
+dataset.yeardiff20 <- dataset %>% filter(., Site %in% dataset.null.yeardiff20$Site) 
