@@ -1,6 +1,8 @@
 library(tidyverse)
 library(brms)
 library(performance)
+library(nlme)
+library(MuMIn)
 
 ## dataset processing ##
 ## read datasets, select -columns with environmental data ##
@@ -131,15 +133,60 @@ bayes_R2 <- function(fit) {
 }
 ###
 
-## creating datasets for null analyses ##
-dataset.null <- dataset %>% group_by(Year, Site, Month) %>% summarise(n = n(), mean.hc = mean(Hardcoral), sd.hc = sd(Hardcoral))
-dataset.null.yeardiff <- dataset.null %>% group_by(Site) %>% summarise(n.years = n(), yearstart = min(Year), yearend = max(Year), yeardiff = max(Year) - min(Year))
-dataset.null.yeardiff5<- dataset.null.yeardiff %>% filter(., yeardiff>4)
-dataset.null.yeardiff10<- dataset.null.yeardiff %>% filter(., yeardiff>9)
-dataset.null.yeardiff15<- dataset.null.yeardiff %>% filter(., yeardiff>14)
-dataset.null.yeardiff20<- dataset.null.yeardiff %>% filter(., yeardiff>19)
+## environmental correlations ##
+envdata <- read.csv("data/dataset.csv", header=T)
 
-dataset.yeardiff5 <- dataset %>% filter(., Site %in% dataset.null.yeardiff5$Site) 
-dataset.yeardiff10 <- dataset %>% filter(., Site %in% dataset.null.yeardiff10$Site) 
-dataset.yeardiff15 <- dataset %>% filter(., Site %in% dataset.null.yeardiff15$Site) 
-dataset.yeardiff20 <- dataset %>% filter(., Site %in% dataset.null.yeardiff20$Site) 
+envdata$CoralMin <- ((envdata$Hardcoral * (nrow(envdata)-1)) + (1/2)) / (nrow(envdata))
+envdata$AlgaeMin <- ((envdata$Macroalgae * (nrow(envdata)-1)) + (1/2)) / (nrow(envdata))
+
+## check for NAs, remove them ##
+envdata.narm <- envdata[complete.cases(envdata[ , 62:92]),]
+envdata.hc1 <- envdata.narm1[complete.cases(envdata.narm1[ , 11]),]
+envdata.ma1 <- envdata.hc[complete.cases(envdata.narm[ , 16]),]
+
+envdata.hc <- scale(envdata.hc1[,c(39:51,53:55,58,62:92)], center=T)
+envdata.ma <- scale(envdata.ma1[,c(39:51,53:55,58,62:92)], center=T)
+
+rm(envdata.narm);rm(envdata.hc1);rm(envdata.ma1)
+
+## create max model, dredge, check model averages, read summaries ##
+maxmodel.hc <- lme(Hardcoral ~ Year + Country + Depth + pop_est_5km + pop_est_100km + 
+                   reef_area_5km + reef_area_100km + npp_mean + npp_min + npp_max + npp_sd + npp_interann_sd + 
+                   wave_mean + wave_sd + wave_interann_sd + dist_market + baa_max + dhw_max + 
+                   sst_max + sst_mean + sst_min + ssta_max + ssta_mean + ssta_min,
+                   random = ~ 1| Location/Site, data=envdata.hc)
+                   
+dredgemodel.hc <- dredge(maxmodel.hc, m.lim=c(NA, 6), trace=T)
+hcmodel.average.d10 <- model.avg(dredgemodel.hc, subset = delta <10)
+hcmodel.average.d6 <- model.avg(dredgemodel.hc, subset = delta <6)
+hcmodel.average.d2 <- model.avg(dredgemodel.hc, subset = delta <2)
+hcmodel.average.95 <- model.avg(dredgemodel.hc, cumsum(weight) <=0.95)
+
+summary(hcmodel.averagec.d6)
+
+maxmodel.ma <- lme(Macroalgae ~ Year + Country + Depth + pop_est_5km + pop_est_100km + 
+                         reef_area_5km + reef_area_100km + npp_mean + npp_min + npp_max + npp_sd + npp_interann_sd + 
+                         wave_mean + wave_sd + wave_interann_sd + dist_market + baa_max + dhw_max + 
+                         sst_max + sst_mean + sst_min + ssta_max + ssta_mean + ssta_min,
+                         random = ~ 1| Location/Site, data=envdata.ma)
+
+dredgemodel.ma <- dredge(maxmodel.ma, m.lim=c(NA, 6), trace=T)
+mamodel.average.d10 <- model.avg(dredgemodel.ma, subset = delta <10)
+mamodel.average.d6 <- model.avg(dredgemodel.ma, subset = delta <6)
+mamodel.average.d2 <- model.avg(dredgemodel.ma, subset = delta <2)
+mamodel.average.95 <- model.avg(dredgemodel.ma, cumsum(weight) <=0.95)
+
+summary(mamodel.averagec.d6)
+
+## lag ##
+envdataYear <- envdata %>% mutate(Year1 = Year + 1, Year2 = Year + 2, Year3 = Year + 3, Year5 = Year + 5, Year10 = Year +10)
+
+env.lag0 <- brm(CoralMin ~ dhw_max + Year + Depth + Country + (1|Location/Site), data=envdataYear, family=Beta, cores=2)
+env.lag1 <- brm(CoralMin ~ dhw_max + Year1 + Depth + Country + (1|Location/Site), data=envdataYear, family=Beta, cores=2)
+env.lag2 <- brm(CoralMin ~ dhw_max + Year2 + Depth + Country + (1|Location/Site), data=envdataYear, family=Beta, cores=2)
+env.lag3 <- brm(CoralMin ~ dhw_max + Year3 + Depth + Country + (1|Location/Site), data=envdataYear, family=Beta, cores=2)
+env.lag1s <- brm(CoralMin ~ s(dhw_max) + s(Year1) + Depth + Country + (1|Location/Site), data=envdataYear, family=Beta, cores=2)
+env.lag0s <- brm(CoralMin ~ s(dhw_max) + s(Year) + Depth + Country + (1|Location/Site), data=envdataYear, family=Beta, cores=2)
+env.lag2s <- brm(CoralMin ~ s(dhw_max) + s(Year2) + Depth + Country + (1|Location/Site), data=envdataYear, family=Beta, cores=2)
+env.lag3s <- brm(CoralMin ~ s(dhw_max) + s(Year3) + Depth + Country + (1|Location/Site), data=envdataYear, family=Beta, cores=2)
+
