@@ -178,6 +178,36 @@ mamodel.average.95 <- model.avg(dredgemodel.ma, cumsum(weight) <=0.95)
 
 summary(mamodel.averagec.d6)
 
+## bleaching ##
+dataset.bpa1 <- dataset %>% filter(., Year>1995 & Year<1998) %>% mutate(., Period = "BPA", Bleaching = "Pre")
+dataset.bpa2 <- dataset %>% filter(., Year==1998) %>% mutate(., Period = "BPA", Bleaching = "During")
+dataset.bpa3 <- dataset %>% filter(., Year>1998 & Year<2001) %>% mutate(., Period = "BPA", Bleaching = "Post")
+dataset.bpafin <- bind_rows(dataset.bpa1,dataset.bpa2,dataset.bpa3)
+dataset.bpafin2 <- dataset.bpafin %>% filter(., Year>1996 & Year <2000)
+
+dataset.bpb1 <- dataset %>% filter(., Year>2007 & Year<2010) %>% mutate(., Period = "BPB", Bleaching = "Pre")
+dataset.bpb2 <- dataset %>% filter(., Year==2010) %>% mutate(., Period = "BPB", Bleaching = "During")
+dataset.bpb3 <- dataset %>% filter(., Year>2010 & Year<2013) %>% mutate(., Period = "BPB", Bleaching = "Post")
+dataset.bpbfin <- bind_rows(dataset.bpb1,dataset.bpb2,dataset.bpb3)
+dataset.bpbfin2 <- dataset.bpbfin %>% filter(., Year>2008 & Year <2012)
+
+dataset.bpc1 <- dataset %>% filter(., Year>2013 & Year<2016) %>% mutate(., Period = "BPC", Bleaching = "Pre")
+dataset.bpc2 <- dataset %>% filter(., Year==2016) %>% mutate(., Period = "BPC", Bleaching = "During")
+dataset.bpc3 <- dataset %>% filter(., Year>2016 & Year<2019) %>% mutate(., Period = "BPC", Bleaching = "Post")
+dataset.bpcfin <- bind_rows(dataset.bpc1,dataset.bpc2,dataset.bpc3)
+dataset.bpcfin2 <- dataset.bpcfin %>% filter(., Year>2014 & Year <2018)
+
+dataset.bpfin <- bind_rows(dataset.bpafin,dataset.bpbfin,dataset.bpcfin)
+dataset.bpfin2 <- bind_rows(dataset.bpafin2,dataset.bpbfin2,dataset.bpcfin2)
+
+brm.bp <- brm(CoralMin ~ Period * Bleaching + Country + (1| Location) + (1| Site), data=dataset.bpfin, family=Beta, cores=2)
+brm.bp.2 <- brm(CoralMin ~ Period + Bleaching + Country + (1| Location) + (1| Site), data=dataset.bpfin, family=Beta, cores=2)
+brm.bp.3 <- brm(CoralMin ~ Bleaching * Country + (1| Location) + (1| Site), data=dataset.bpfin, family=Beta, cores=2)
+brm.bp.3a <- brm(CoralMin ~ Country * Bleaching + (1| Location) + (1| Site), data=dataset.bpfin, family=Beta, cores=2)
+brm.bp.4 <- brm(CoralMin ~ Bleaching + Country + (1| Location) + (1| Site), data=dataset.bpfin, family=Beta, cores=2)
+compare_performance(brm.bp,brm.bp.2,brm.bp.3, brm.bp.4)
+compare_performance(brm.bp.3a,brm.bp.3)
+
 ## lag ##
 envdataYear <- envdata %>% mutate(Year1 = Year + 1, Year2 = Year + 2, Year3 = Year + 3, Year5 = Year + 5, Year10 = Year +10)
 
@@ -189,4 +219,3 @@ env.lag1s <- brm(CoralMin ~ s(dhw_max) + s(Year1) + Depth + Country + (1|Locatio
 env.lag0s <- brm(CoralMin ~ s(dhw_max) + s(Year) + Depth + Country + (1|Location/Site), data=envdataYear, family=Beta, cores=2)
 env.lag2s <- brm(CoralMin ~ s(dhw_max) + s(Year2) + Depth + Country + (1|Location/Site), data=envdataYear, family=Beta, cores=2)
 env.lag3s <- brm(CoralMin ~ s(dhw_max) + s(Year3) + Depth + Country + (1|Location/Site), data=envdataYear, family=Beta, cores=2)
-
