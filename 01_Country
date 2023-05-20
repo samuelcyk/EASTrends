@@ -1,4 +1,6 @@
 library(tidyverse)
+library(brms)
+library(performance)
 
 ## dataset processing ##
 ## read datasets, select -columns with environmental data ##
@@ -27,6 +29,8 @@ wiprior <- c(set_prior("normal(0,0.25)", class="b"),
 ## main models ##
 brm.wip.bycountry <- brm(CoralMin ~ s(Year, by=Country) + s(Depth) + Country + (1|Location/Site), prior=wiprior, data=dataset, family=Beta, cores=2, iter=10000, file="brm.wip.bycountry")
 brma.wip.bycountry <- brm(AlgaeMin ~ s(Year, by=Country) + s(Depth) + Country + (1|Location/Site), prior=wiprior, data=dataset, family=Beta, cores=2, iter=10000, file="brma.wip.bycountry")
+bayes_R2(brm.wip.bycountry)
+bayes_R2(brma.wip.bycountry)
 
 ## models compared ##
 brm.method <- brm(CoralMin ~ s(Year, by=Country) + s(Depth) + Country + (1|Method) + (1|Location/Site), data=dataset, family=Beta, cores=2)
@@ -112,6 +116,20 @@ brm.tw2 <- brm(CoralMin ~ Year + Depth + (1| Location) + (1| Site), data=dataset
 brm.th <- brm(CoralMin ~ s(Year) + s(Depth) + (1| Location) + (1| Site), data=dataset.thailand, family=Beta, cores=2)
 brm.vn <- brm(CoralMin ~ s(Year) + Depth + (1| Location) + (1| Site), data=dataset.vietnam, family=Beta, cores=2)
 brm.vn2 <- brm(CoralMin ~ Year + Depth + (1| Location) + (1| Site), data=dataset.vietnam, family=Beta, cores=2)
+
+## bayes_R2 function from https://avehtari.github.io/bayes_R2/bayes_R2.html ##
+###
+bayes_R2 <- function(fit) {
+  mupred <- rstanarm::posterior_epred(fit)
+  var_mupred <- apply(mupred, 1, var)
+  if (family(fit)$family == "binomial" && NCOL(y) == 1) {
+    sigma2 <- apply(mupred*(1-mupred), 1, mean)
+  } else {
+    sigma2 <- as.matrix(fit, pars = c("sigma"))^2
+  }
+  var_mupred / (var_mupred + sigma2)
+}
+###
 
 ## creating datasets for null analyses ##
 dataset.null <- dataset %>% group_by(Year, Site, Month) %>% summarise(n = n(), mean.hc = mean(Hardcoral), sd.hc = sd(Hardcoral))
