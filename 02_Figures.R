@@ -7,21 +7,23 @@ library(ggnewscale)
 library(ggspatial)
 library(patchwork)
 
-max(dataset$Latitude); max(dataset$Longitude)
-min(dataset$Latitude); min(dataset$Longitude)
-
+## set themes ##
 theme_base <- theme_set(theme_bw(base_size = 10) + theme(legend.position="bottom")) #create theme
 theme_noleg <- theme_set(theme_bw(base_size = 10) + theme(legend.position="none")) #create theme
 
+## set colours ##
 countrycols.seq <- c("Brunei"="#f86060", "Cambodia"="#f8a560", "Hong Kong"="#f8c560", "Indonesia"="#edd146", 
                      "Japan"="#eded46", "Malaysia"="#b8e75a", "Myanmar"="#4dc64d", "Philippines"="#3a9595",
                      "Singapore"="#44779f", "South Korea"="#4b67a6", "Taiwan"="#644eaa", "Thailand"="#8345a5",
                      "Vietnam"="#c74d92")
                      
 #### Figure 1a ####
-
 EA <- ne_countries(continent = "asia", scale = "large", returnclass = "sf")
 EA_check <- EA[, c("admin", "name", "formal_en", "region_un", "subregion", "region_wb")]
+
+max(dataset$Latitude); max(dataset$Longitude)
+min(dataset$Latitude); min(dataset$Longitude)
+
 basemap <- ggplot(data = EA) +
   geom_sf() +
   xlab("Longitude") + ylab("Latitude") +
@@ -140,13 +142,10 @@ hist.set <- hist.br + hist.ca + hist.hk + hist.in +
   hist.sg + hist.sk + hist.tw + hist.th + hist.vn + 
   plot_layout(design = layout.hist)
   
- 
-ggsave(hist.set, width=15, height=15, units="cm", dpi=300, filename="newfigspub/hist.nogrid.tiff")
-ggsave(hist.set, width=15, height=15, units="cm", dpi=300, filename="newfigspub/hist.nogrid.svg")
-
-ggsave(basemap_wsites, width=15, height=15, units="cm", dpi=300, filename="newfigspub/map.tiff")
-ggsave(basemap_wsites, width=15, height=15, units="cm", dpi=300, filename="newfigspub/map.svg")
-
+fig1 <- basemap_wsites + hist.set
+  
+ggsave(fig1, width=30, height=15, units="cm", dpi=300, filename="figs/hist.tiff")
+ggsave(fig1, width=30, height=15, units="cm", dpi=300, filename="figs/hist.svg")
 
 #### Model plots for Fig 2/3####
 brmplots <- plot(marginal_effects(brm.wip.bycountry), point_args = c(alpha = 0.5, size = 1.5), points=F, ask=F)
