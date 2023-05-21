@@ -14,6 +14,6 @@ As the data were shared by the various authors under a data sharing agreement, a
 02_Figures.R - Figures for manuscript
 
 # Data
-03_Data.csv - Censored dataset with Sites, Localities and Countries censored as data were provided under a data sharing agreement.
+censoredData.csv - Censored dataset with Sites, Localities and Countries censored as data were provided under a data sharing agreement.
 
-Please contact the author for requests for the dataset as he can redirect your requests to the right parties within the GCRMN East Asia.
+Please contact the author for requests for the dataset as he can redirect your requests to the right parties within the GCRMN East Asia. If the data becomes publicly available, this repository will update with the files accordingly.
