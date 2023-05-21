@@ -9,11 +9,11 @@ Please see also https://gcrmn.net/2020-report/ for the global report from synthe
 As the data were shared by the various authors under a data sharing agreement, an anonymized dataset with the locations scrubbed is available here. The full dataset can be requested from the corresponding author who will direct the request to the corresponding contributors for approval.
 
 # Codes
-01_Country.R - Country data processing
-02_Env.R - Environmental data processing
-03_Models.R - brms models and all data analyses
-04_Figures.R - Figures creations and processing 
+00_Environmental.R - Environmental data processing
+01_Models.R - Models and analyses
+02_Figures.R - Figures for manuscript
 
 # Data
-01_Data.csv - Benthic cover dataset
-02_Correlates.csv - Environmental and socio-economic correlates 
+03_Data.csv - Censored dataset with Sites, Localities and Countries censored as data were provided under a data sharing agreement.
+
+Please contact the author for requests for the dataset as he can redirect your requests to the right parties within the GCRMN East Asia.
