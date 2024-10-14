@@ -1,5 +1,5 @@
-# Chan et al 2023 Decadal stability in coral cover could mask hidden changes on reefs in the East Asian Seas (Unpublished)
-Please see https://doi.org/ for description of study
+# Chan et al 2023 Decadal stability in coral cover could mask hidden changes on reefs in the East Asian Seas (Communications Biology)
+Please see https://doi.org/10.1038/s42003-023-05000-z for description of study
 
 Please see also https://icriforum.org/documents/status-and-trends-of-east-asian-coral-reefs-1983-2019/ for the regional report contextualising the findings in the regional context.
 
